@@ -13,10 +13,6 @@ export default function Footer() {
           <div className="ht absolute inset-0" data-reveal>
             <img src={M("city-night")} alt="Jalan kota di malam hari" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
           </div>
-          <div className="absolute left-4 top-4 md:left-6 md:top-6 z-10 bg-paper text-ink p-3 pr-6 lbl leading-relaxed">
-            <b className="block">Redaksi Cryptonite</b>
-            Jakarta, Indonesia
-          </div>
         </div>
 
         <div className="grain bg-paper text-ink flex flex-col justify-between px-5 md:px-10 pt-16 lg:pt-24 pb-8">

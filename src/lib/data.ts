@@ -71,3 +71,14 @@ export const POSTS = [
   { kind: "Threads", cover: "Yang terjadi di balik pump semalam", img: "chart-dark" },
   { kind: "Carousel", cover: "Peta sektor bulan ini", img: "blocks" },
 ];
+
+// Hero wall: the timeline as a grid of post covers
+export const WALL: { tag: string; title: string; img: string }[] = [
+  ...SPOTLIGHT,
+  ...STORIES.map(({ tag, title, img }) => ({ tag, title, img })),
+  ...POSTS.map((p) => ({ tag: p.kind, title: p.cover, img: p.img })),
+  { tag: "Berita", title: "Bali jadi pusat komunitas Web3 Asia Tenggara", img: "bali" },
+  { tag: "Edukasi", title: "Kenapa blockchain disebut buku besar", img: "blocks" },
+  { tag: "Social News", title: "Debat panas di Threads soal airdrop", img: "talk" },
+];
+export const SM = (n: string) => `/media/sm/${n}.jpg`;

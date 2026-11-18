@@ -1,142 +1,174 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+/* eslint-disable @next/next/no-img-element */
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import HalftoneStage from "./HalftoneStage";
+import Gem from "./Gem";
 import Ticker from "./Ticker";
-import { M, SPOTLIGHT } from "@/lib/data";
+import { SM, WALL } from "@/lib/data";
 
-const CYCLE = 6;
-const IMAGES = SPOTLIGHT.map((s) => M(s.img));
-const BASE = 820, THIN = 260, RADIUS = 260;
+const COLS = 7;
+const BASE = 860, THIN = 240, RADIUS = 280;
 
 function Chars({ text }: { text: string }) {
-  return <>{[...text].map((c, i) => <span key={i} className="hc inline-block" style={{ fontVariationSettings: `"wght" ${BASE}` }}>{c === " " ? " " : c}</span>)}</>;
+  return <>{[...text].map((c, i) => <span key={i} className="hc inline-block" style={{ fontVariationSettings: `"wght" ${BASE}` }}>{c}</span>)}</>;
+}
+
+function Cover({ s }: { s: (typeof WALL)[number] }) {
+  return (
+    <a href="#liputan" data-cursor="Baca" className="group relative block aspect-[4/5] overflow-hidden bg-black">
+      <div className="ht absolute inset-0"><img src={SM(s.img)} alt="" className="absolute inset-0 h-full w-full object-cover group-hover:scale-[1.06]" loading="lazy" decoding="async" /></div>
+      <span className="absolute left-2.5 top-2.5 lbl !text-[12px] bg-paper text-ink px-1.5 py-0.5">{s.tag}</span>
+      <span className="absolute inset-x-2.5 bottom-3 cmp text-[clamp(1.1rem,1.75vw,1.9rem)] leading-[0.92] text-white">
+        <span className="bg-blue box-decoration-clone px-1">{s.title}</span>
+      </span>
+    </a>
+  );
 }
 
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
-  const [idx, setIdx] = useState(0);
-  const [paused, setPaused] = useState(false);
-  const bar = useRef<gsap.core.Tween | null>(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const circle = root.current!.querySelector<SVGPathElement>(".hero-circle");
-    const len = circle?.getTotalLength() ?? 0;
-    const ctx = gsap.context(() => {
-      if (circle) gsap.set(circle, { strokeDasharray: len, strokeDashoffset: reduce ? 0 : len });
-      if (reduce) { gsap.set(".intro-step", { display: "none" }); return; }
-      gsap.timeline({ delay: 0.15 })
-        .to(".intro-step", { yPercent: -101, duration: 0.9, ease: "power4.inOut", stagger: { each: 0.07, from: "end" } })
-        .from(".hero-ln", { yPercent: 110, duration: 1.1, ease: "power4.out", stagger: 0.1 }, "-=0.45")
-        .to(circle, { strokeDashoffset: 0, duration: 0.9, ease: "power2.inOut" }, "-=0.3")
-        .from(".hero-in", { opacity: 0, y: 14, duration: 0.7, ease: "power2.out", stagger: 0.06 }, "-=0.9");
-      const st = { trigger: root.current, start: "top top", end: "bottom top", scrub: true };
-      gsap.to(".hero-shade", { opacity: 0.75, ease: "none", scrollTrigger: st });
-      gsap.to(".hero-stage", { yPercent: 18, scale: 1.06, ease: "none", scrollTrigger: st });
-      gsap.to(".hero-head", { yPercent: -30, ease: "none", scrollTrigger: st });
-    }, root);
-
-    // letters thin out around the cursor (variable weight axis)
-    const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-    if (reduce || !fine) return () => ctx.revert();
-    const chars = gsap.utils.toArray<HTMLElement>(".hc", root.current);
-    const w = chars.map(() => BASE);
-    let centers: { x: number; y: number }[] = [];
-    const measure = () => { centers = chars.map((c) => { const r = c.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }); };
-    const mouse = { x: -9999, y: -9999 };
-    const move = (e: PointerEvent) => { mouse.x = e.clientX; mouse.y = e.clientY; };
-    const leave = () => { mouse.x = -9999; };
-    let frame = 0;
-    const tick = () => {
-      if (++frame % 20 === 0) measure();
-      chars.forEach((c, i) => {
-        const d = Math.hypot(mouse.x - centers[i].x, mouse.y - centers[i].y);
-        const k = Math.max(0, 1 - d / RADIUS);
-        const target = BASE - (BASE - THIN) * k * k;
-        w[i] += (target - w[i]) * 0.16;
-        c.style.fontVariationSettings = `"wght" ${w[i].toFixed(0)}`;
-      });
-    };
-    measure();
-    gsap.ticker.add(tick);
-    root.current!.addEventListener("pointermove", move);
-    root.current!.addEventListener("pointerleave", leave);
     const el = root.current!;
-    return () => { ctx.revert(); gsap.ticker.remove(tick); el.removeEventListener("pointermove", move); el.removeEventListener("pointerleave", leave); };
+    const cleanups: (() => void)[] = [];
+
+    const ctx = gsap.context(() => {
+      // timeline columns drift in alternating directions
+      const loops = gsap.utils.toArray<HTMLElement>(".wcol-inner").map((c, i) => {
+        const up = i % 2 === 0;
+        return gsap.fromTo(c, { yPercent: up ? 0 : -50 }, { yPercent: up ? -50 : 0, duration: 46 + (i % 3) * 9, ease: "none", repeat: -1 });
+      });
+      if (reduce) { loops.forEach((l) => l.pause()); gsap.set(".intro-step", { display: "none" }); return; }
+
+      // entrance
+      gsap.timeline({ delay: 0.1 })
+        .to(".intro-step", { yPercent: -101, duration: 0.9, ease: "power4.inOut", stagger: { each: 0.06, from: "end" } })
+        .from(".wcol", { yPercent: 30, opacity: 0, duration: 1.4, ease: "power3.out", stagger: { each: 0.06, from: "center" } }, "-=0.6")
+        .from(".mk-ch .hc", { yPercent: 115, duration: 1, ease: "power4.out", stagger: 0.04 }, "-=1.2")
+        .from(".mk-gem", { scale: 0, rotate: -220, duration: 1.2, ease: "back.out(1.4)" }, "-=0.9")
+        .from(".hero-in", { opacity: 0, y: 16, duration: 0.7, ease: "power2.out", stagger: 0.08 }, "-=0.7");
+
+      // the dive: scroll pulls the camera into the gem
+      const gemCenter = () => {
+        const h = el.querySelector<HTMLElement>(".mk")!.getBoundingClientRect();
+        const g = el.querySelector<HTMLElement>(".mk-gem")!.getBoundingClientRect();
+        return `${g.left + g.width / 2 - h.left}px ${g.top + g.height / 2 - h.top}px`;
+      };
+      const zoom = () => {
+        const g = el.querySelector<HTMLElement>(".mk-gem")!.getBoundingClientRect();
+        return (Math.hypot(window.innerWidth, window.innerHeight) / g.width) * 1.25;
+      };
+      const tl = gsap.timeline({
+        defaults: { ease: "none" },
+        scrollTrigger: { trigger: el, start: "top top", end: "bottom bottom", scrub: 0.8, invalidateOnRefresh: true },
+      });
+      tl.to(".hero-in", { opacity: 0, y: -20, duration: 0.1 }, 0)
+        .to(".mk-l", { xPercent: -40, duration: 0.5, ease: "power2.in" }, 0.05)
+        .to(".mk-r", { xPercent: 40, duration: 0.5, ease: "power2.in" }, 0.05)
+        .fromTo(".mk", { scale: 1, transformOrigin: gemCenter }, { scale: zoom, transformOrigin: gemCenter, duration: 0.75, ease: "power3.in" }, 0.08)
+        .to(".mk-gem", { rotate: 90, duration: 0.75, ease: "power1.in" }, 0.08)
+        .to(".wall", { scale: 1.35, opacity: 0.25, duration: 0.7, ease: "power2.in" }, 0.05)
+        .set(".wall", { pointerEvents: "none" }, 0.6)
+        .to(".hero-blue", { opacity: 1, duration: 0.08 }, 0.78)
+        .fromTo(".hero-stair", { scaleY: 0 }, { scaleY: 1, duration: 0.14, stagger: 0.012, ease: "power2.inOut" }, 0.86);
+
+      // scroll speed nudges the columns
+      const st = ScrollTrigger.create({
+        trigger: el, start: "top top", end: "bottom top",
+        onUpdate: (self) => {
+          const v = 1 + Math.min(4, Math.abs(self.getVelocity()) / 400);
+          loops.forEach((l) => gsap.to(l, { timeScale: v, duration: 0.2, overwrite: true, onComplete: () => { gsap.to(l, { timeScale: 1, duration: 1.2 }); } }));
+        },
+      });
+      cleanups.push(() => st.kill());
+    }, el);
+
+    // pointer: wall drifts against the cursor, letters thin out near it
+    const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    if (!reduce && fine) {
+      const wx = gsap.quickTo(".wall-par", "x", { duration: 1.2, ease: "power3.out" });
+      const wy = gsap.quickTo(".wall-par", "y", { duration: 1.2, ease: "power3.out" });
+      const chars = gsap.utils.toArray<HTMLElement>(".hc", el);
+      const w = chars.map(() => BASE);
+      let centers: { x: number; y: number }[] = [];
+      const measure = () => { centers = chars.map((c) => { const r = c.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; }); };
+      const mouse = { x: -9999, y: -9999 };
+      const move = (e: PointerEvent) => {
+        mouse.x = e.clientX; mouse.y = e.clientY;
+        wx((e.clientX / window.innerWidth - 0.5) * -60); wy((e.clientY / window.innerHeight - 0.5) * -40);
+      };
+      const leave = () => { mouse.x = -9999; };
+      let frame = 0;
+      const tick = () => {
+        if (++frame % 15 === 0) measure();
+        chars.forEach((c, i) => {
+          const d = centers[i] ? Math.hypot(mouse.x - centers[i].x, mouse.y - centers[i].y) : 9999;
+          const k = Math.max(0, 1 - d / RADIUS);
+          w[i] += (BASE - (BASE - THIN) * k * k - w[i]) * 0.15;
+          c.style.fontVariationSettings = `"wght" ${w[i].toFixed(0)}`;
+        });
+      };
+      measure();
+      gsap.ticker.add(tick);
+      el.addEventListener("pointermove", move);
+      el.addEventListener("pointerleave", leave);
+      cleanups.push(() => { gsap.ticker.remove(tick); el.removeEventListener("pointermove", move); el.removeEventListener("pointerleave", leave); });
+    }
+    return () => { ctx.revert(); cleanups.forEach((f) => f()); };
   }, []);
 
-  useEffect(() => {
-    if (paused) { bar.current?.pause(); return; }
-    const el = root.current?.querySelector<HTMLElement>(`[data-row="${idx}"] .row-bar`);
-    if (!el) return;
-    bar.current?.kill();
-    bar.current = gsap.fromTo(el, { scaleX: 0 }, { scaleX: 1, duration: CYCLE, ease: "none", onComplete: () => setIdx((i) => (i + 1) % SPOTLIGHT.length) });
-    return () => { bar.current?.kill(); };
-  }, [idx, paused]);
-
-  const active = SPOTLIGHT[idx];
+  const cols = Array.from({ length: COLS }, (_, c) => Array.from({ length: 6 }, (_, r) => WALL[(c * 4 + r * 3) % WALL.length]));
 
   return (
-    <section ref={root} className="relative h-[100svh] min-h-[680px] bg-black text-paper overflow-hidden">
-      <div className="hero-stage absolute inset-0 will-change-transform">
-        <HalftoneStage images={IMAGES} index={idx} />
-      </div>
-      <div className="hero-shade absolute inset-0 bg-black opacity-0 pointer-events-none" />
-      <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/80 to-transparent pointer-events-none" />
-      <div className="absolute inset-x-0 bottom-0 h-[60%] bg-gradient-to-t from-black via-black/60 to-transparent pointer-events-none" />
-
-      <div className="absolute inset-x-0 bottom-[48px] px-4 md:px-8 pb-6 md:pb-10 grid md:grid-cols-12 gap-8 items-end pointer-events-none">
-        <h1 className="hero-head md:col-span-8 cmp text-[15.5vw] md:text-[10.4vw]" aria-label="Kripto, tanpa basa-basi.">
-          <span className="mask" aria-hidden><span className="ln hero-ln cmp-out" data-ink="paper"><Chars text="Kripto," /></span></span>
-          <span className="mask overflow-visible" aria-hidden>
-            <span className="ln hero-ln">
-              <Chars text="Tanpa " />
-              <span className="relative inline-block">
-                <Chars text="basa-basi." />
-                <svg className="absolute -left-[6%] -top-[16%] w-[112%] h-[130%] overflow-visible pointer-events-none" viewBox="0 0 300 100" preserveAspectRatio="none" aria-hidden>
-                  <path className="hero-circle" d="M262 12 C190 -6 40 2 14 40 C-8 74 90 100 176 96 C262 92 312 62 288 30 C270 8 210 4 150 6" fill="none" stroke="var(--blue)" strokeWidth="4" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-                </svg>
-              </span>
-            </span>
-          </span>
-        </h1>
-
-        <div className="hero-in md:col-span-4 relative handles border border-white/35 bg-black/55 backdrop-blur-sm pointer-events-auto text-paper" onMouseLeave={() => setPaused(false)}>
-          <i className="h" /><i className="h" /><i className="h" /><i className="h" />
-          <div className="flex justify-between lbl px-4 py-2.5 border-b border-white/20">
-            <span>Sorotan hari ini</span>
-            <span className="tnum text-paper/70">{idx + 1} / {SPOTLIGHT.length}</span>
-          </div>
-          <ul>
-            {SPOTLIGHT.map((s, i) => (
-              <li key={s.title} data-row={i} className={`relative ${i === idx ? "" : "hidden lg:block"}`}>
-                <button
-                  onMouseEnter={() => { setPaused(true); setIdx(i); }}
-                  onFocus={() => { setPaused(true); setIdx(i); }}
-                  onClick={() => setIdx(i)}
-                  className={`w-full text-left grid grid-cols-[5.5rem_1fr] gap-2 px-4 py-2.5 transition-colors ${i === idx ? "text-white" : "text-paper/45 hover:text-paper"}`}
-                >
-                  <span className={`lbl pt-0.5 ${i === idx ? "text-sky" : ""}`}>{s.tag}</span>
-                  <span className="text-[17px] leading-tight font-semibold">{s.title}</span>
-                </button>
-                <span className={`row-bar absolute left-0 bottom-0 h-px w-full bg-sky origin-left ${i === idx ? "" : "opacity-0"}`} style={{ transform: "scaleX(0)" }} />
-              </li>
-            ))}
-          </ul>
-          <div className="flex justify-end gap-6 lbl px-4 py-2.5 border-t border-white/20">
-            <button className="lg:hidden hover:text-sky" onClick={() => { setPaused(true); setIdx((idx + 1) % SPOTLIGHT.length); }}><span className="roll"><span>Berikutnya</span></span></button>
-            <a href="#liputan" className="hover:text-sky"><span className="roll"><span>Baca {active.tag.toLowerCase()}</span></span></a>
+    <section ref={root} className="relative bg-black h-[280vh]">
+      <div className="sticky top-0 h-[100svh] overflow-hidden text-paper">
+        {/* the timeline wall */}
+        <div className="wall absolute inset-0 will-change-transform">
+          <div className="wall-par absolute -inset-[22%] rotate-[-9deg]">
+            <div className="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-3 md:gap-4 h-full px-3">
+              {cols.map((col, c) => (
+                <div key={c} className={`wcol relative overflow-hidden ${c >= 5 ? "hidden lg:block" : c >= 3 ? "hidden md:block" : ""}`}>
+                  <div className="wcol-inner flex flex-col gap-3 md:gap-4">
+                    {[...col, ...col].map((s, i) => <Cover key={i} s={s} />)}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+        <div className="absolute inset-0 bg-black/45 pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,.72)_0%,rgba(0,0,0,.25)_55%,transparent_80%)] pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-36 bg-gradient-to-b from-black/80 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-[42%] bg-gradient-to-t from-black via-black/75 to-transparent pointer-events-none" />
 
-      <div className="absolute inset-x-0 bottom-0 bg-black"><Ticker /></div>
+        {/* the wordmark, with the gem as its O */}
+        <div className="absolute inset-0 grid place-items-center pointer-events-none">
+          <h1 className="mk cmp flex items-center whitespace-nowrap text-[19vw] md:text-[17vw] will-change-transform" aria-label="Cryptonite">
+            <span className="mk-l mk-ch inline-flex overflow-hidden pb-[0.04em]" aria-hidden><Chars text="CRYPT" /></span>
+            <span className="mk-gem inline-block w-[0.66em] h-[0.66em] mx-[0.03em] translate-y-[-0.02em] drop-shadow-[0_0_40px_rgba(47,143,255,.45)]" aria-hidden><Gem className="w-full h-full" /></span>
+            <span className="mk-r mk-ch inline-flex overflow-hidden pb-[0.04em]" aria-hidden><Chars text="NITE" /></span>
+          </h1>
+        </div>
 
-      <div className="absolute inset-0 z-[90] flex pointer-events-none" aria-hidden>
-        {Array.from({ length: 6 }).map((_, i) => <div key={i} className={`intro-step flex-1 h-full ${i % 2 ? "bg-blue" : "bg-paper"}`} />)}
+        <div className="absolute inset-x-0 bottom-[52px] px-4 md:px-8 pb-5 flex flex-wrap items-end justify-between gap-6 pointer-events-none">
+          <p className="hero-in max-w-[30rem] text-lg md:text-2xl leading-[1.15] font-semibold">
+            Media kripto Indonesia. Edukasi, analisis, berita, dan kabar sosial yang sedang ramai di timeline Anda.
+          </p>
+          <p className="hero-in lbl flex items-center gap-3">Gulir untuk masuk <span className="block w-px h-10 bg-paper/60 origin-top animate-pulse" /></p>
+        </div>
+        <div className="hero-in absolute inset-x-0 bottom-0 bg-black"><Ticker /></div>
+
+        <div className="hero-blue absolute inset-0 bg-blue opacity-0 pointer-events-none" />
+        <div className="absolute inset-0 flex items-end pointer-events-none" aria-hidden>
+          {Array.from({ length: 7 }).map((_, i) => <div key={i} className="hero-stair flex-1 h-full bg-paper origin-bottom" style={{ transform: "scaleY(0)" }} />)}
+        </div>
+
+        <div className="absolute inset-0 z-[90] flex pointer-events-none" aria-hidden>
+          {Array.from({ length: 6 }).map((_, i) => <div key={i} className={`intro-step flex-1 h-full ${i % 2 ? "bg-blue" : "bg-paper"}`} />)}
+        </div>
       </div>
     </section>
   );

@@ -18,20 +18,29 @@ export default function Cursor() {
     document.body.classList.add("has-cursor");
     const xTo = gsap.quickTo(dot.current, "x", { duration: 0.35, ease: "power3.out" });
     const yTo = gsap.quickTo(dot.current, "y", { duration: 0.35, ease: "power3.out" });
+    const last = { x: -1, y: -1 };
+    const read = (target: Element | null) => {
+      const t = target?.closest<HTMLElement>("[data-cursor]");
+      setLabel(t ? t.dataset.cursor || "" : null);
+      setDark(!!target?.closest("[data-cursor-dark]"));
+    };
     const move = (e: PointerEvent) => {
       if (e.pointerType !== "mouse") return;
       setOn(true);
+      last.x = e.clientX; last.y = e.clientY;
       xTo(e.clientX); yTo(e.clientY);
-      const t = (e.target as HTMLElement).closest<HTMLElement>("[data-cursor]");
-      setLabel(t ? t.dataset.cursor || "" : null);
-      setDark(!!(e.target as HTMLElement).closest("[data-cursor-dark]"));
+      read(e.target as Element);
     };
+    // content moves under a still pointer while scrolling: re-read what is beneath it
+    const scroll = () => { if (last.x >= 0) read(document.elementFromPoint(last.x, last.y)); };
     const out = () => setOn(false);
     window.addEventListener("pointermove", move);
+    window.addEventListener("scroll", scroll, { passive: true });
     document.addEventListener("pointerleave", out);
     return () => {
       document.body.classList.remove("has-cursor");
       window.removeEventListener("pointermove", move);
+      window.removeEventListener("scroll", scroll);
       document.removeEventListener("pointerleave", out);
     };
   }, []);

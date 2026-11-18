@@ -23,7 +23,7 @@ export default function Nav() {
   const tl = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
-    const on = () => setSolid(window.scrollY > window.innerHeight * 0.85);
+    const on = () => { const hero = document.querySelector("main > section") as HTMLElement | null; setSolid(window.scrollY > (hero ? (hero.offsetHeight - window.innerHeight) * 0.8 : window.innerHeight)); };
     on();
     window.addEventListener("scroll", on, { passive: true });
     return () => window.removeEventListener("scroll", on);
