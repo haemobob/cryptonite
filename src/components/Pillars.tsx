@@ -1,56 +1,75 @@
 "use client";
-import { useEffect, useRef } from "react";
+/* eslint-disable @next/next/no-img-element */
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { PILLARS } from "@/lib/data";
+import { M, PILLARS } from "@/lib/data";
 
 export default function Pillars() {
   const root = useRef<HTMLElement>(null);
-  const track = useRef<HTMLDivElement>(null);
+  const float = useRef<HTMLDivElement>(null);
+  const [hot, setHot] = useState<number | null>(null);
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
-    const mm = gsap.matchMedia();
-    mm.add("(min-width: 900px) and (prefers-reduced-motion: no-preference)", () => {
-      const t = track.current!;
-      const dist = () => t.scrollWidth - window.innerWidth;
-      const tween = gsap.to(t, {
-        x: () => -dist(),
-        ease: "none",
-        scrollTrigger: { trigger: root.current, start: "top top", end: () => `+=${dist()}`, pin: true, scrub: 0.6, invalidateOnRefresh: true },
-      });
-      gsap.utils.toArray<HTMLElement>(".pillar-word").forEach((el) => {
-        gsap.from(el, { xPercent: 18, ease: "none", scrollTrigger: { trigger: el.closest(".pillar"), containerAnimation: tween, start: "left 100%", end: "left 20%", scrub: true } });
-      });
-      gsap.to(".pillar-bar", { scaleX: 1, ease: "none", scrollTrigger: { trigger: root.current, start: "top top", end: () => `+=${dist()}`, scrub: true } });
-    });
-    return () => mm.revert();
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const ctx = gsap.context(() => {
+      if (!reduce) {
+        gsap.from(".pl-word", { yPercent: 105, duration: 1, ease: "power4.out", stagger: 0.08, scrollTrigger: { trigger: ".pl-list", start: "top 78%" } });
+        gsap.from(".pl-rule", { scaleX: 0, transformOrigin: "left", duration: 1.2, ease: "power3.inOut", stagger: 0.08, scrollTrigger: { trigger: ".pl-list", start: "top 80%" } });
+      }
+    }, root);
+    // floating preview follows the pointer with a little lag
+    const xTo = gsap.quickTo(float.current, "x", { duration: 0.55, ease: "power3.out" });
+    const yTo = gsap.quickTo(float.current, "y", { duration: 0.55, ease: "power3.out" });
+    const rTo = gsap.quickTo(float.current, "rotate", { duration: 0.8, ease: "power3.out" });
+    let lastX = 0;
+    let placed = false;
+    const move = (e: PointerEvent) => {
+      const b = root.current!.getBoundingClientRect();
+      if (!placed) { gsap.set(float.current, { x: e.clientX - b.left, y: e.clientY - b.top }); placed = true; }
+      xTo(e.clientX - b.left); yTo(e.clientY - b.top);
+      rTo(gsap.utils.clamp(-10, 10, (e.clientX - lastX) * 0.6)); lastX = e.clientX;
+    };
+    root.current!.addEventListener("pointermove", move);
+    const el = root.current!;
+    return () => { ctx.revert(); el.removeEventListener("pointermove", move); };
   }, []);
 
   return (
-    <section id="pilar" ref={root} className="relative bg-ink overflow-hidden">
-      <div className="hidden md:block absolute top-0 inset-x-0 h-1.5 bg-paper/10 z-10">
-        <div className="pillar-bar h-full bg-sky origin-left scale-x-0" />
+    <section id="pilar" ref={root} className="relative bg-black text-paper px-4 md:px-8 pt-16 md:pt-24 pb-28 md:pb-40 overflow-hidden">
+      <div className="flex justify-between items-end mono text-paper/70 mb-10">
+        <span className="brk">Empat pilar Cryptonite</span>
+        <span className="hidden md:inline">Arahkan kursor untuk melihat</span>
       </div>
-      <div ref={track} className="flex flex-col md:flex-row md:w-max md:h-screen">
-        {PILLARS.map((p) => (
-          <article key={p.key} className="pillar w-full md:w-screen md:h-screen shrink-0 px-4 md:px-8 py-16 md:py-10 flex flex-col justify-end md:justify-between" style={{ background: p.bg, color: p.fg }}>
-            <div className="md:mt-auto">
-              <h2 className="pillar-word display text-[24vw] md:text-[19vw] whitespace-nowrap">{p.key}</h2>
-              <p className="display-wide text-2xl md:text-4xl mt-4">{p.line}</p>
-            </div>
-            <div className="grid md:grid-cols-12 gap-6 items-end mt-10">
-              <p className="md:col-span-5 text-lg leading-snug">{p.body}</p>
-              <ul className="md:col-start-8 md:col-span-5 flex flex-wrap gap-2">
-                {p.items.map((it) => (
-                  <li key={it} className="border-2 px-3 py-1.5 text-sm font-bold hover:bg-current hover:[&>span]:invert transition-colors cursor-default" style={{ borderColor: p.fg }}>
-                    <span>{it}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </article>
+
+      <ul className="pl-list" onMouseLeave={() => setHot(null)}>
+        {PILLARS.map((p, i) => (
+          <li key={p.key} className="relative" onMouseEnter={() => setHot(i)}>
+            <span className="pl-rule absolute top-0 inset-x-0 h-px bg-paper/35" />
+            <a href="#" className="group grid md:grid-cols-12 gap-x-6 gap-y-3 py-6 md:py-7 items-center">
+              <span className="md:col-span-7 mask">
+                <span className={`ln pl-word block cmp text-[19vw] md:text-[10.4vw] transition-[color,-webkit-text-stroke-color] duration-300 ${hot === null || hot === i ? "" : "cmp-out"}`} data-ink="paper" style={hot !== null && hot !== i ? { WebkitTextStrokeColor: "rgba(244,243,239,.45)" } : undefined}>
+                  {p.key}
+                </span>
+              </span>
+              <span className="md:col-span-2 mono text-sky">{p.cadence}</span>
+              <span className="md:col-span-3 text-[15px] leading-snug text-paper/80 max-w-xs">{p.line}</span>
+              {/* small-screen image */}
+              <span className="md:hidden ht aspect-[16/9] block mt-2"><img src={M(p.img)} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" /></span>
+            </a>
+          </li>
         ))}
+        <li className="pl-rule h-px bg-paper/35" />
+      </ul>
+
+      <div ref={float} className="pointer-events-none absolute left-0 top-0 hidden md:block z-10" aria-hidden>
+        <div className={`-translate-x-1/2 -translate-y-1/2 w-[22vw] max-w-[340px] aspect-[4/5] transition-[opacity,scale] duration-300 ${hot === null ? "opacity-0 scale-90" : "opacity-100 scale-100"}`}>
+          {PILLARS.map((p, i) => (
+            <img key={p.key} src={M(p.img)} alt="" className={`absolute inset-0 h-full w-full object-cover border border-paper/40 transition-opacity duration-300 ${hot === i ? "opacity-100" : "opacity-0"}`} />
+          ))}
+          <span className="absolute -bottom-7 left-0 mono text-paper">{hot !== null ? PILLARS[hot].key : ""}</span>
+        </div>
       </div>
     </section>
   );

@@ -1,71 +1,116 @@
 "use client";
-import dynamic from "next/dynamic";
-import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import HalftoneStage from "./HalftoneStage";
 import Ticker from "./Ticker";
+import Clock from "./Clock";
+import { M, SPOTLIGHT } from "@/lib/data";
 
-const Shard = dynamic(() => import("./Shard"), { ssr: false });
-
-function hasWebGL() {
-  try {
-    const c = document.createElement("canvas");
-    return !!(c.getContext("webgl2") || c.getContext("webgl"));
-  } catch {
-    return false;
-  }
-}
+const CYCLE = 6;
+const IMAGES = SPOTLIGHT.map((s) => M(s.img));
 
 export default function Hero() {
   const root = useRef<HTMLElement>(null);
-  const webgl = useSyncExternalStore(() => () => {}, hasWebGL, () => false);
+  const [idx, setIdx] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const bar = useRef<gsap.core.Tween | null>(null);
 
+  // intro: stepped blocks lift away, then type rises — one orchestrated entrance
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const ctx = gsap.context(() => {
-      if (reduce) return;
-      // one orchestrated entrance
-      gsap.from(".hero-line", { yPercent: 105, duration: 1.1, ease: "power4.out", stagger: 0.12, delay: 0.1 });
-      gsap.from(".hero-fade", { opacity: 0, y: 14, duration: 0.8, ease: "power2.out", stagger: 0.08, delay: 0.7 });
-      // words pull apart as the page scrolls
-      gsap.to(".hero-a", { xPercent: -14, ease: "none", scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: true } });
-      gsap.to(".hero-b", { xPercent: 14, ease: "none", scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: true } });
+      if (reduce) { gsap.set(".intro-step", { display: "none" }); return; }
+      const tl = gsap.timeline({ delay: 0.15 });
+      tl.to(".intro-step", { yPercent: -101, duration: 0.9, ease: "power4.inOut", stagger: { each: 0.07, from: "end" } })
+        .from(".hero-ln", { yPercent: 110, duration: 1.1, ease: "power4.out", stagger: 0.1 }, "-=0.45")
+        .from(".hero-in", { opacity: 0, y: 12, duration: 0.7, ease: "power2.out", stagger: 0.06 }, "-=0.8");
+
+      // scroll: the stage sinks and darkens, headline drifts slower than the page
+      gsap.to(".hero-shade", { opacity: 0.75, ease: "none", scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: true } });
+      gsap.to(".hero-stage", { yPercent: 18, scale: 1.06, ease: "none", scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: true } });
+      gsap.to(".hero-head", { yPercent: -30, ease: "none", scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: true } });
     }, root);
     return () => ctx.revert();
   }, []);
 
-  return (
-    <section ref={root} className="relative bg-ink text-paper min-h-[100svh] flex flex-col overflow-hidden">
-      <div className="relative flex-1 flex flex-col justify-center pt-28 pb-10">
-        <div className="absolute inset-0 pointer-events-none">
-          {webgl && (
-            <div className="absolute -right-[12%] top-[2%] w-[75vw] h-[38%] md:right-[2%] md:top-[8%] md:w-[46vw] md:h-[80%] pointer-events-auto">
-              <Shard />
-            </div>
-          )}
-        </div>
+  // auto-advance the spotlight, with a progress bar on the active row
+  useEffect(() => {
+    if (paused) { bar.current?.pause(); return; }
+    const el = root.current?.querySelector<HTMLElement>(`[data-row="${idx}"] .row-bar`);
+    if (!el) return;
+    bar.current?.kill();
+    bar.current = gsap.fromTo(el, { scaleX: 0 }, { scaleX: 1, duration: CYCLE, ease: "none", onComplete: () => setIdx((i) => (i + 1) % SPOTLIGHT.length) });
+    return () => { bar.current?.kill(); };
+  }, [idx, paused]);
 
-        <h1 className="relative px-4 md:px-8 select-none" aria-label="Cryptonite">
-          <span className="mask hero-a">
-            <span className="line hero-line display text-[26vw] md:text-[24vw]">Crypto</span>
-          </span>
-          <span className="mask hero-b -mt-[2vw]">
-            <span className="line hero-line display text-[26vw] md:text-[24vw] text-sky">nite</span>
-          </span>
+  const active = SPOTLIGHT[idx];
+
+  return (
+    <section ref={root} className="relative h-[100svh] min-h-[680px] bg-black text-paper overflow-hidden">
+      <div className="hero-stage absolute inset-0 will-change-transform">
+        <HalftoneStage images={IMAGES} index={idx} />
+      </div>
+      <div className="hero-shade absolute inset-0 bg-black opacity-0 pointer-events-none" />
+      <div className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black via-black/60 to-transparent pointer-events-none" />
+
+      {/* meta row */}
+      <div className="hero-in absolute top-[76px] inset-x-0 px-4 md:px-8 flex justify-between mono text-paper/75 pointer-events-none">
+        <span className="hidden sm:inline"><Clock kind="date" /></span>
+        <span className="hidden sm:inline">Jakarta  −6.1944, 106.8229</span>
+      </div>
+
+      <div className="absolute inset-x-0 bottom-[46px] px-4 md:px-8 pb-6 md:pb-10 grid lg:grid-cols-12 gap-8 items-end pointer-events-none">
+        <h1 className="hero-head lg:col-span-8 cmp text-[17vw] sm:text-[14vw] lg:text-[10.6vw]">
+          <span className="mask"><span className="ln hero-ln cmp-out" data-ink="paper">Kripto,</span></span>
+          <span className="mask"><span className="ln hero-ln">tanpa <span className="serif text-sky lowercase tracking-normal">basa-basi.</span></span></span>
         </h1>
 
-        <div className="relative px-4 md:px-8 mt-8 grid md:grid-cols-12 gap-6 items-end">
-          <p className="hero-fade md:col-span-5 text-lg md:text-xl leading-snug max-w-md">
-            Media kripto Indonesia. Edukasi yang jernih, analisis yang berani, dan kabar sosial sebelum jadi headline.
-          </p>
-          <div className="hero-fade md:col-start-9 md:col-span-4 flex md:justify-end gap-3 text-sm font-semibold">
-            <a href="#pilar" className="bg-blue text-white px-5 py-3 hover:bg-white hover:text-ink transition-colors">Mulai membaca</a>
-            <a href="#sosial" className="border border-paper/40 px-5 py-3 hover:border-sky hover:text-sky transition-colors">Radar sosial</a>
+        {/* spotlight index — hover to preview, auto-advances */}
+        <div
+          className="hero-in lg:col-span-4 handles border border-white/35 bg-black/55 backdrop-blur-sm pointer-events-auto text-paper"
+          onMouseLeave={() => setPaused(false)}
+        >
+          <i className="h" /><i className="h" /><i className="h" /><i className="h" />
+          <div className="flex justify-between mono px-4 py-2.5 border-b border-white/20">
+            <span className="brk">Sorotan</span>
+            <span className="tnum">{String(idx + 1).padStart(2, "0")}/{String(SPOTLIGHT.length).padStart(2, "0")}</span>
+          </div>
+          <ul>
+            {SPOTLIGHT.map((s, i) => (
+              <li key={s.title} data-row={i} className={`relative ${i === idx ? "" : "hidden lg:block"}`}>
+                <button
+                  onMouseEnter={() => { setPaused(true); setIdx(i); }}
+                  onFocus={() => { setPaused(true); setIdx(i); }}
+                  onClick={() => setIdx(i)}
+                  className={`w-full text-left grid grid-cols-[2.6rem_1fr] gap-2 px-4 py-2.5 transition-colors ${i === idx ? "text-white" : "text-paper/50 hover:text-paper"}`}
+                >
+                  <span className="mono pt-0.5 tnum">{String(i + 1).padStart(2, "0")}</span>
+                  <span className="text-[15px] leading-snug font-semibold">{s.title}</span>
+                </button>
+                <span className={`row-bar absolute left-0 bottom-0 h-px w-full bg-sky origin-left ${i === idx ? "" : "opacity-0"}`} style={{ transform: "scaleX(0)" }} />
+              </li>
+            ))}
+          </ul>
+          <div className="flex justify-between items-center mono px-4 py-2.5 border-t border-white/20">
+            <span className="text-sky">{active.tag}</span>
+            <span className="flex gap-4">
+              <button className="lg:hidden uppercase hover:text-sky" onClick={() => { setPaused(true); setIdx((idx + 1) % SPOTLIGHT.length); }}>Berikutnya</button>
+              <a href="#liputan" className="hover:text-sky">Baca liputan</a>
+            </span>
           </div>
         </div>
       </div>
-      <Ticker />
+
+      <div className="absolute inset-x-0 bottom-0 bg-black"><Ticker /></div>
+
+      {/* intro curtain */}
+      <div className="absolute inset-0 z-[70] flex pointer-events-none" aria-hidden>
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className={`intro-step flex-1 h-full ${i % 2 ? "bg-blue" : "bg-paper"}`} />
+        ))}
+      </div>
     </section>
   );
 }

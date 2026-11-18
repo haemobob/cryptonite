@@ -1,10 +1,12 @@
 import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
-import Headlines from "@/components/Headlines";
+import Manifesto from "@/components/Manifesto";
+import Stories from "@/components/Stories";
+import WordMarquee from "@/components/WordMarquee";
+import BlueField from "@/components/BlueField";
 import Pillars from "@/components/Pillars";
-import SocialRadar from "@/components/SocialRadar";
 import Kelas from "@/components/Kelas";
-import Feed from "@/components/Feed";
+import Social from "@/components/Social";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -12,11 +14,13 @@ export default function Home() {
     <main>
       <Nav />
       <Hero />
-      <Headlines />
+      <Manifesto />
+      <Stories />
+      <WordMarquee />
+      <BlueField />
       <Pillars />
-      <SocialRadar />
       <Kelas />
-      <Feed />
+      <Social />
       <Footer />
     </main>
   );
