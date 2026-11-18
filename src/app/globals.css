@@ -1,0 +1,64 @@
+@import "tailwindcss";
+@import "@fontsource-variable/archivo/wdth.css";
+
+@theme inline {
+  --font-sans: "Archivo Variable", ui-sans-serif, system-ui, sans-serif;
+  --color-ink: #000000;
+  --color-paper: #f5f5f2;
+  --color-blue: #0050f0;
+  --color-sky: #1a8cff;
+  --color-up: #12b76a;
+  --color-down: #f04438;
+}
+
+:root {
+  --ink: #000000;
+  --paper: #f5f5f2;
+  --blue: #0050f0;
+  --sky: #1a8cff;
+}
+
+html {
+  background: var(--ink);
+}
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--paper);
+  color: var(--ink);
+  font-stretch: 100%;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Display type: condensed, heavy, tight — the headline voice of the page */
+.display {
+  font-weight: 900;
+  font-stretch: 62%;
+  text-transform: uppercase;
+  line-height: 0.84;
+  letter-spacing: -0.01em;
+}
+.display-wide {
+  font-weight: 900;
+  font-stretch: 125%;
+  text-transform: uppercase;
+  line-height: 0.9;
+  letter-spacing: -0.02em;
+}
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* word/char reveal masks */
+.mask { display: block; overflow: hidden; }
+.mask > .line { display: block; will-change: transform; }
+
+::selection { background: var(--blue); color: #fff; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+
+@keyframes marquee { to { transform: translateX(-50%); } }
+@keyframes blink { 50% { opacity: 0.2; } }
