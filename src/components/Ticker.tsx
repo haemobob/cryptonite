@@ -24,11 +24,11 @@ export default function Ticker({ tone = "dark" }: { tone?: "dark" | "light" }) {
   const row = [...coins, ...coins];
   const dark = tone === "dark";
   return (
-    <div className={`relative overflow-hidden mono ${dark ? "text-paper border-t border-white/15" : "text-ink border-y border-ink"}`} aria-label="Harga kripto">
+    <div className={`relative overflow-hidden lbl ${dark ? "text-paper border-t border-white/15" : "text-ink border-y border-ink"}`} aria-label="Harga kripto">
       <div className="flex w-max" style={{ animation: "marquee 42s linear infinite" }}>
         {row.map((c, i) => (
           <span key={i} className={`flex items-baseline gap-2.5 px-5 py-3 tnum whitespace-nowrap border-r ${dark ? "border-white/10" : "border-ink/20"}`}>
-            <b className="font-bold">{c.sym}</b>
+            <b className="font-[850]">{c.sym}</b>
             <span>${fmt(c.price)}</span>
             <span className={c.chg >= 0 ? "text-up" : "text-down"}>{c.chg >= 0 ? "+" : "−"}{Math.abs(c.chg).toFixed(1)}%</span>
           </span>

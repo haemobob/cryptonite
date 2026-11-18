@@ -5,7 +5,7 @@ export default function Sticker({ text, size = 132, className = "" }: { text: st
     <div className={`relative rounded-full bg-blue text-white grid place-items-center ${className}`} style={{ width: size, height: size }}>
       <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full" style={{ animation: "spin 22s linear infinite" }} aria-hidden>
         <defs><path id={id} d="M50,50 m-38,0 a38,38 0 1,1 76,0 a38,38 0 1,1 -76,0" /></defs>
-        <text fontSize="8.4" fontFamily="var(--font-mono)" letterSpacing="1.6" fill="currentColor">
+        <text fontSize="9.6" fontFamily="var(--font-gothic)" fontWeight="700" letterSpacing="1.2" fill="currentColor">
           <textPath href={`#${id}`}>{text}</textPath>
         </text>
       </svg>

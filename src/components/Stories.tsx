@@ -51,7 +51,7 @@ export default function Stories() {
             <span className="mask inline-block align-bottom"><span className="ln">terbaru</span></span>
           </h2>
           <a href="#" className="group flex items-center justify-between gap-10 bg-blue text-white cmp text-3xl px-4 py-2.5 min-w-[16rem] hover:bg-ink transition-colors">
-            Semua liputan <Arrow className="group-hover:translate-x-1 transition-transform" />
+            <span className="roll"><span>Semua liputan</span></span> <Arrow className="group-hover:translate-x-1 transition-transform" />
           </a>
         </div>
 
@@ -60,19 +60,19 @@ export default function Stories() {
             {STORIES.map((s, i) => {
               const t = TONES[s.tone as keyof typeof TONES];
               return (
-                <article key={s.title} className={`st-card group snap-start shrink-0 w-[78vw] sm:w-[340px] lg:w-[min(30vw,420px)] border ${t.card} shadow-[0_24px_50px_-28px_rgba(0,0,0,.45)]`} style={{ rotate: `${TILT[i % TILT.length]}deg` }}>
-                  <div className={`ht ${s.tone === "blue" ? "ht-blue" : ""} aspect-[4/4.2] border-b border-inherit`}>
-                    <img src={M(s.img)} alt="" className="absolute inset-0 h-full w-full object-cover group-hover:scale-[1.04] transition-transform duration-700" loading="lazy" />
+                <article key={s.title} data-cursor="Baca" className={`st-card group snap-start shrink-0 w-[78vw] sm:w-[340px] lg:w-[min(30vw,420px)] border ${t.card} shadow-[0_24px_50px_-28px_rgba(0,0,0,.45)]`} style={{ rotate: `${TILT[i % TILT.length]}deg` }}>
+                  <div className={`ht relative ${s.tone === "blue" ? "ht-blue" : ""} aspect-[4/4.2] border-b border-inherit`}>
+                    <img src={M(s.img)} alt="" className="absolute -inset-[4%] h-[108%] w-[108%] object-cover vskew" loading="lazy" />
                   </div>
                   <div className="px-5 pt-4">
                     <div className="flex items-baseline gap-3">
                       <span className={`cmp text-xl ${t.tag}`}>{s.tag}</span>
-                      <span className="mono opacity-75">{s.date}</span>
+                      <span className="lbl opacity-75">{s.date}</span>
                     </div>
                     <h3 className="cmp text-[2.6rem] lg:text-[clamp(2.2rem,2.9vw,3rem)] mt-2 min-h-[2.6em]">{s.title}</h3>
                   </div>
                   <div className="flex items-stretch justify-between mt-5 border-t border-inherit">
-                    <span className="mono self-center px-5">{s.read} baca</span>
+                    <span className="lbl self-center px-5">{s.read} baca</span>
                     <a href="#" className={`flex items-center gap-4 cmp text-2xl px-5 py-3 border-l transition-colors ${t.btn}`}>Baca <Arrow /></a>
                   </div>
                 </article>

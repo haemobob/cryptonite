@@ -8,6 +8,8 @@ import Pillars from "@/components/Pillars";
 import Kelas from "@/components/Kelas";
 import Social from "@/components/Social";
 import Footer from "@/components/Footer";
+import Cursor from "@/components/Cursor";
+import Reveals from "@/components/Reveals";
 
 export default function Home() {
   return (
@@ -22,6 +24,8 @@ export default function Home() {
       <Kelas />
       <Social />
       <Footer />
+      <Cursor />
+      <Reveals />
     </main>
   );
 }

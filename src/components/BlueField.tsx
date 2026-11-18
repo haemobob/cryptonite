@@ -26,10 +26,10 @@ export default function BlueField() {
   }, []);
 
   return (
-    <section id="radar" ref={root} className="field relative text-white overflow-hidden">
+    <section id="radar" ref={root} data-cursor-dark className="field relative text-white overflow-hidden">
       <div className="px-4 md:px-8 pt-24 md:pt-32">
         <div className="grid md:grid-cols-12 gap-8">
-          <figure className="bf-thumb md:col-span-3 w-44 md:w-full max-w-[260px] ht ht-blue aspect-[4/3] border border-white/60">
+          <figure className="bf-thumb relative md:col-span-3 w-44 md:w-full max-w-[260px] ht ht-blue aspect-[4/3] border border-white/60">
             <img src={M("hand-btc")} alt="" className="absolute inset-0 h-full w-full object-cover" />
           </figure>
           <div className="md:col-start-7 md:col-span-6 text-[15px] leading-snug font-semibold max-w-xl">
@@ -38,23 +38,23 @@ export default function BlueField() {
           </div>
         </div>
 
-        <div className="mt-12 flex items-center gap-4 mono">
-          <a href={SOCIALS.instagram} target="_blank" rel="noreferrer" className="brk hover:text-black">Instagram</a>
+        <div className="mt-12 flex items-center gap-4 lbl">
+          <a href={SOCIALS.instagram} target="_blank" rel="noreferrer" className="hover:text-black">Instagram</a>
           <span className="flex-1 h-px bg-white/50" />
-          <a href={SOCIALS.threads} target="_blank" rel="noreferrer" className="brk hover:text-black">Threads</a>
+          <a href={SOCIALS.threads} target="_blank" rel="noreferrer" className="hover:text-black">Threads</a>
           <span className="flex-1 h-px bg-white/50" />
-          <a href={SOCIALS.facebook} target="_blank" rel="noreferrer" className="brk hover:text-black">Facebook</a>
+          <a href={SOCIALS.facebook} target="_blank" rel="noreferrer" className="hover:text-black">Facebook</a>
         </div>
 
         <h2 className="bf-head cmp text-right text-[14vw] md:text-[9.6vw] mt-16 md:mt-24">
           <span className="mask"><span className="ln bf-ln">Kami baca timeline</span></span>
-          <span className="mask"><span className="ln bf-ln"><span className="serif normal-case text-[0.9em] tracking-normal">supaya</span> Anda tidak</span></span>
+          <span className="mask"><span className="ln bf-ln"><span className="cmp-out" data-ink="paper" style={{ WebkitTextStrokeColor: "#fff" }}>supaya</span> Anda tidak</span></span>
           <span className="mask"><span className="ln bf-ln">terjebak hype.</span></span>
         </h2>
 
         <div className="bf-table mt-20 md:mt-28 border-t border-white">
-          <div className="flex justify-between mono py-3 border-b border-white/40">
-            <span className="brk">Radar sosial</span>
+          <div className="flex justify-between lbl py-3 border-b border-white/40">
+            <span>Radar sosial</span>
             <span>Intensitas percakapan, 24 jam</span>
           </div>
           <ul>
@@ -67,20 +67,20 @@ export default function BlueField() {
                     onMouseEnter={() => setActive(i)} onFocus={() => setActive(i)} onClick={() => setActive(i)}
                     className={`w-full grid grid-cols-[2.4rem_1fr_auto] md:grid-cols-[3rem_1.3fr_1fr_5rem] items-center gap-3 md:gap-6 py-4 px-1 border-b border-white/40 text-left transition-colors ${sel ? "bg-white text-blue" : ""}`}
                   >
-                    <span className="mono tnum pl-2">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="lbl tnum pl-2">{String(i + 1).padStart(2, "0")}</span>
                     <span className="cmp text-4xl md:text-6xl">{r.topic}</span>
                     <span className="hidden md:flex gap-[3px] h-5" aria-label={`Intensitas ${r.heat} dari 100`}>
                       {Array.from({ length: SEGMENTS }).map((_, k) => (
                         <i key={k} className={`flex-1 ${k < on ? `seg-on ${sel ? "bg-blue" : "bg-white"}` : sel ? "bg-blue/15" : "bg-white/20"}`} />
                       ))}
                     </span>
-                    <span className={`mono tnum text-right pr-2 ${r.shift.startsWith("-") ? (sel ? "text-down" : "text-black") : ""}`}>{r.shift}</span>
+                    <span className={`lbl tnum text-right pr-2 ${r.shift.startsWith("-") ? (sel ? "text-down" : "text-black") : ""}`}>{r.shift}</span>
                   </button>
                 </li>
               );
             })}
           </ul>
-          <p className="mono text-white/60 mt-3">Data ilustrasi untuk desain</p>
+          <p className="lbl text-white/60 mt-3">Data ilustrasi untuk desain</p>
         </div>
       </div>
 

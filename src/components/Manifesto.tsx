@@ -77,17 +77,17 @@ export default function Manifesto() {
         <div className="lg:col-span-5 relative min-h-[520px] md:min-h-[640px]">
           <figure data-speed="0.6" data-rot0="-4" data-rot1="-1.5" className="absolute right-0 top-0 w-[78%] handles text-ink">
             <i className="h" /><i className="h" /><i className="h" /><i className="h" />
-            <div className="ht aspect-[4/5] border border-ink"><img src={M("jakarta")} alt="Bundaran HI, Jakarta" className="absolute inset-0 h-full w-full object-cover" /></div>
-            <figcaption className="mono mt-2 flex justify-between"><span>Bundaran HI</span><span>Jakarta</span></figcaption>
+            <div className="ht relative aspect-[4/5] border border-ink vskew" data-reveal><img src={M("jakarta")} alt="Bundaran HI, Jakarta" className="absolute inset-0 h-full w-full object-cover" /></div>
+            <figcaption className="lbl mt-2 flex justify-between"><span>Bundaran HI</span><span>Jakarta</span></figcaption>
           </figure>
           <figure data-speed="1.4" data-rot0="5" data-rot1="2" className="absolute left-0 bottom-6 w-[52%] bg-blue p-2.5 shadow-[0_30px_60px_-30px_rgba(0,0,0,.6)]">
-            <div className="aspect-[4/5] relative overflow-hidden"><img src={M("phone-apps")} alt="" className="absolute inset-0 h-full w-full object-cover" /></div>
+            <div className="aspect-[4/5] relative overflow-hidden vskew" data-reveal><img src={M("phone-apps")} alt="" className="absolute inset-0 h-full w-full object-cover" /></div>
           </figure>
           <div data-speed="2" className="absolute left-[40%] top-[38%]">
             <Sticker text="MEDIA KRIPTO INDONESIA ✦ EDUKASI ✦ ANALISIS ✦ BERITA ✦ " size={128} />
           </div>
-          <span data-speed="1" data-rot0="-6" data-rot1="-3" className="absolute left-[2%] top-[14%] mono border border-ink bg-paper px-3 py-2">Bahasa Indonesia</span>
-          <span data-speed="1.7" data-rot0="4" data-rot1="7" className="absolute right-[4%] bottom-[2%] mono border border-ink bg-paper px-3 py-2 max-w-[13rem] leading-snug">Instagram, Facebook, Threads. Satu sumber.</span>
+          <span data-speed="1" data-rot0="-6" data-rot1="-3" className="absolute left-[2%] top-[14%] lbl border border-ink bg-paper px-3 py-2">Bahasa Indonesia</span>
+          <span data-speed="1.7" data-rot0="4" data-rot1="7" className="absolute right-[4%] bottom-[2%] lbl border border-ink bg-paper px-3 py-2 max-w-[13rem] leading-snug">Instagram, Facebook, Threads. Satu redaksi.</span>
         </div>
       </div>
     </section>

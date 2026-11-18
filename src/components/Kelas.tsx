@@ -50,7 +50,7 @@ export default function Kelas() {
             Kelas bertahap yang disusun seperti tangga. Setiap bab membuka bab berikutnya, dari dompet pertama sampai membedah data on-chain sendiri.
           </p>
 
-          <div role="tablist" aria-label="Tingkat kelas" className="mt-10 flex flex-wrap gap-2 mono">
+          <div role="tablist" aria-label="Tingkat kelas" className="mt-10 flex flex-wrap gap-2 lbl">
             {(Object.keys(LEVELS) as Level[]).map((k) => (
               <button key={k} role="tab" aria-selected={k === level} onClick={() => { setLevel(k); setHi(null); }}
                 className={`px-3.5 py-2 border border-ink transition-colors ${k === level ? "bg-blue border-blue text-white" : "hover:bg-ink hover:text-paper"}`}>
@@ -64,9 +64,9 @@ export default function Kelas() {
               <li key={t} className="kl-item">
                 <button onMouseEnter={() => setHi(i)} onFocus={() => setHi(i)}
                   className={`w-full grid grid-cols-[3.2rem_1fr_auto] items-baseline py-3.5 border-b border-ink text-left transition-colors ${hi === i ? "text-blue" : ""}`}>
-                  <span className="mono tnum">Bab {String(i + 1).padStart(2, "0")}</span>
+                  <span className="lbl tnum">Bab {String(i + 1).padStart(2, "0")}</span>
                   <span className="cmp text-3xl md:text-4xl">{t}</span>
-                  <span className={`mono transition-opacity ${hi === i ? "opacity-100" : "opacity-0"}`}>Mulai</span>
+                  <span className={`lbl transition-opacity ${hi === i ? "opacity-100" : "opacity-0"}`}>Mulai</span>
                 </button>
               </li>
             ))}
@@ -86,7 +86,7 @@ export default function Kelas() {
                 </div>
               </div>
             ))}
-            <span className="absolute right-0 bottom-0 mono text-right">{level}<br />{lessons.length} bab</span>
+            <span className="absolute right-0 bottom-0 lbl text-right">{level}<br />{lessons.length} bab</span>
           </div>
         </div>
       </div>
