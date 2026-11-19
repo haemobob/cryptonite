@@ -117,7 +117,7 @@ export default function Hero() {
 
         <div className="absolute z-[2] inset-x-0 bottom-0 h-[30%] bg-gradient-to-t from-black/85 to-transparent pointer-events-none" />
         <div className="absolute z-[2] inset-x-0 bottom-[52px] px-4 md:px-8 pb-5 flex flex-wrap items-end justify-between gap-6 pointer-events-none">
-          <p className="hero-in max-w-[30rem] t-lead">
+          <p className="hero-in max-w-[30rem] text-lg md:text-2xl leading-[1.15] font-semibold">
             Media kripto Indonesia. Edukasi, analisis, berita, dan kabar sosial yang sedang ramai di timeline Anda.
           </p>
           <p className="hero-in lbl flex items-center gap-3">Gulir untuk mendarat <span className="block w-px h-10 bg-paper/60 animate-pulse" /></p>
@@ -126,7 +126,7 @@ export default function Hero() {
 
         <div className="hero-blue z-[3] absolute inset-0 bg-blue opacity-0 pointer-events-none" />
         <div className="absolute z-[4] inset-0 flex items-end pointer-events-none" aria-hidden>
-          {Array.from({ length: 7 }).map((_, i) => <div key={i} className="hero-stair flex-1 h-full bg-black origin-bottom" style={{ transform: "scaleY(0)" }} />)}
+          {Array.from({ length: 7 }).map((_, i) => <div key={i} className="hero-stair flex-1 h-full bg-paper origin-bottom" style={{ transform: "scaleY(0)" }} />)}
         </div>
 
       </div>

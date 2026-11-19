@@ -4,8 +4,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { WORDS } from "@/lib/data";
 
-// the two treatments only: solid and outline
-const STYLE = ["", "cmp-out", "", "", "cmp-out", "", "cmp-out"];
+const STYLE = ["", "text-blue", "cmp-out", "", "text-blue", "", "cmp-out", "text-blue"];
 
 // Two rows of words drifting in opposite directions; scroll speed pushes them along.
 export default function WordMarquee() {
@@ -34,12 +33,12 @@ export default function WordMarquee() {
   }, []);
 
   return (
-    <section ref={root} className="bg-black text-paper overflow-hidden py-16 md:py-24 select-none border-t border-white/10" aria-label="Topik yang kami liput">
+    <section ref={root} className="grain bg-paper text-ink overflow-hidden py-16 md:py-24 select-none" aria-label="Topik yang kami liput">
       {WORDS.map((row, r) => (
         <div key={r} className="flex">
           <div className="wm-row flex w-max shrink-0">
             {[...row, ...row].map((w, i) => (
-              <span key={i} className={`cmp text-[20vw] md:text-[min(10.5vw,18vh)] pr-[0.22em] whitespace-nowrap ${STYLE[(i + r * 3) % STYLE.length]}`}>{w}</span>
+              <span key={i} className={`cmp text-[20vw] md:text-[10.5vw] pr-[0.22em] whitespace-nowrap ${STYLE[(i + r * 3) % STYLE.length]}`} data-ink="ink">{w}</span>
             ))}
           </div>
         </div>
