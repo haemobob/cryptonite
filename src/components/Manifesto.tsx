@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Stairs from "./Stairs";
 import { M } from "@/lib/data";
 
 const STATEMENT =
@@ -26,7 +27,7 @@ export default function Manifesto() {
   }, []);
 
   return (
-    <section ref={root} className="sec bg-black text-paper overflow-hidden">
+    <section ref={root} className="sec !pb-0 bg-black text-paper overflow-hidden">
       <div className="flex justify-between gap-6 lbl muted border-t border-current/20 pt-3">
         <span>Tentang Cryptonite</span>
         <span>Media kripto Indonesia</span>
@@ -56,6 +57,7 @@ export default function Manifesto() {
           </figure>
         </div>
       </div>
+      <Stairs to="#f6f6f3" className="-mx-4 md:-mx-8 mt-20 md:mt-28" />
     </section>
   );
 }

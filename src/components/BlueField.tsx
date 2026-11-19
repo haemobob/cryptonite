@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import SectionHead from "./SectionHead";
+import Stairs from "./Stairs";
 import { M, RADAR, SOCIALS } from "@/lib/data";
 
 const SEGMENTS = 20;
@@ -18,8 +19,6 @@ export default function BlueField() {
     const ctx = gsap.context(() => {
       gsap.from(".seg-on", { opacity: 0, duration: 0.02, stagger: { each: 0.012, from: "start" }, scrollTrigger: { trigger: ".bf-table", start: "top 75%" } });
       gsap.fromTo(".bf-thumb", { yPercent: 14 }, { yPercent: -14, ease: "none", scrollTrigger: { trigger: root.current, start: "top bottom", end: "bottom top", scrub: true } });
-      // stair-step hand-off into the black section below
-      gsap.fromTo(".stair", { scaleY: 0 }, { scaleY: 1, ease: "none", stagger: 0.06, scrollTrigger: { trigger: ".stairs", start: "top bottom", end: "bottom 60%", scrub: true } });
     }, root);
     return () => ctx.revert();
   }, []);
@@ -74,11 +73,7 @@ export default function BlueField() {
         </div>
       </div>
 
-      <div className="stairs mt-20 h-[18vh] flex items-end" aria-hidden>
-        {[0.2, 0.35, 0.5, 0.62, 0.74, 0.86, 1].map((h, i) => (
-          <div key={i} className="stair flex-1 bg-black origin-bottom" style={{ height: `${h * 100}%` }} />
-        ))}
-      </div>
+      <Stairs to="#000" className="mt-20" />
     </section>
   );
 }

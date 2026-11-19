@@ -16,7 +16,7 @@ export default function Ticker({ tone = "dark" }: { tone?: "dark" | "light" }) {
           </span>
         ))}
       </div>
-      <span className={`absolute right-0 inset-y-0 flex items-center gap-1.5 pl-4 pr-4 ${dark ? "bg-black" : "bg-paper"}`}>
+      <span className={`absolute right-0 inset-y-0 flex items-center gap-1.5 pl-4 pr-4 ${dark ? "bg-black" : "bg-[#f6f6f3]"}`}>
         <i className={`inline-block size-1.5 rounded-full ${live ? "bg-up" : "bg-current opacity-40"}`} style={live ? { animation: "blink 1.6s infinite" } : undefined} />
         {live ? "Langsung" : "Contoh"}
       </span>

@@ -2,6 +2,7 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Stairs from "./Stairs";
 import { WORDS } from "@/lib/data";
 
 // the two treatments only: solid and outline
@@ -34,7 +35,7 @@ export default function WordMarquee() {
   }, []);
 
   return (
-    <section ref={root} className="bg-black text-paper overflow-hidden py-16 md:py-24 select-none border-t border-white/10" aria-label="Topik yang kami liput">
+    <section ref={root} className="theme-light overflow-hidden pt-10 md:pt-16 select-none" aria-label="Topik yang kami liput">
       {WORDS.map((row, r) => (
         <div key={r} className="flex">
           <div className="wm-row flex w-max shrink-0">
@@ -44,6 +45,7 @@ export default function WordMarquee() {
           </div>
         </div>
       ))}
+      <Stairs to="#0050f0" className="mt-12 md:mt-20" />
     </section>
   );
 }
