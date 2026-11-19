@@ -61,13 +61,8 @@ export default function Hero() {
           }
         },
       });
-      if (reduce) { gsap.set(".intro-step", { display: "none" }); return; }
-
-      gsap.timeline({ delay: 0.1 })
-        .to(".intro-step", { yPercent: -101, duration: 0.9, ease: "power4.inOut", stagger: { each: 0.06, from: "end" } })
-        .from(".wm .hc", { yPercent: 110, duration: 1.1, ease: "power4.out", stagger: 0.045 }, "-=0.5")
-        .from(".planet-wrap", { yPercent: 45, opacity: 0, duration: 2.2, ease: "expo.out" }, "-=1.1")
-        .from(".hero-in", { opacity: 0, y: 16, duration: 0.8, ease: "power2.out", stagger: 0.08 }, "-=1.4");
+      if (reduce) return;
+      gsap.from(".planet-wrap", { opacity: 0, duration: 0.9, ease: "power1.out" });
 
       const tl = gsap.timeline({ defaults: { ease: "none" }, scrollTrigger: { trigger: el, start: "top top", end: "bottom bottom", scrub: 0.6 } });
       tl.to(".hero-in", { opacity: 0, y: -24, duration: 0.12 }, 0)
@@ -134,9 +129,6 @@ export default function Hero() {
           {Array.from({ length: 7 }).map((_, i) => <div key={i} className="hero-stair flex-1 h-full bg-paper origin-bottom" style={{ transform: "scaleY(0)" }} />)}
         </div>
 
-        <div className="absolute inset-0 z-[90] flex pointer-events-none" aria-hidden>
-          {Array.from({ length: 6 }).map((_, i) => <div key={i} className={`intro-step flex-1 h-full ${i % 2 ? "bg-blue" : "bg-paper"}`} />)}
-        </div>
       </div>
     </section>
   );

@@ -7,7 +7,7 @@ import * as THREE from "three";
   - surface: 3D Voronoi facets that glint as the planet turns; on the night side
     the facet edges and cell "nodes" glow like a network
   - atmosphere: additive fresnel shell
-  - crescent: thousands of shimmering points orbiting the lit limb
+  - crescent: thousands of shimmering points flowing along the lit limb
   - stars: a faint twinkling field
   Scroll progress (0..1) is pushed in from the hero: the sun swings round,
   the planet rises and spins up, the crescent bursts outward, the camera dives.
@@ -121,21 +121,28 @@ void main() {
 }`;
 
 const ringVert = /* glsl */ `
-attribute float aAngle; attribute float aRadius; attribute float aSpeed; attribute float aSize; attribute float aPhase; attribute float aTw; attribute float aZ;
-uniform float uTime; uniform float uSpread; uniform float uPR; uniform vec2 uMouse; uniform float uHover; uniform float uR;
+attribute float aOff; attribute float aRad; attribute float aSpeed; attribute float aSize; attribute float aPhase; attribute float aTw; attribute float aZ;
+uniform float uTime; uniform float uSpread; uniform float uPR; uniform vec2 uMouse; uniform float uHover; uniform float uR; uniform float uCenter;
 varying float vA; varying float vHot;
+const float SPAN = 1.95;
 void main() {
-  float th = aAngle + uTime * aSpeed;
-  float r = uR * (aRadius + uSpread * (aRadius - 0.96) * 6.0 + uSpread * 0.25);
+  // each point flows along the crescent and re-enters at the opposite tip,
+  // so the shape stays put (and symmetric) while the dust keeps moving
+  float o = mod(aOff + uTime * aSpeed + SPAN, 2.0 * SPAN) - SPAN;
+  float u = o / SPAN;
+  float taper = pow(cos(u * 1.5707963), 1.6);
+  float radius = 1.006 + aRad * taper;
+  float th = uCenter + o;
+  float r = uR * (radius + uSpread * (radius - 0.96) * 6.0 + uSpread * 0.25);
   vec3 pos = vec3(cos(th) * r, sin(th) * r, aZ);
   vec2 d = pos.xy - uMouse;
   float f = exp(-dot(d, d) * 6.0) * 0.32 * uHover;
   pos.xy += normalize(d + 1e-4) * f;
   vec4 mv = modelViewMatrix * vec4(pos, 1.0);
   float tw = pow(0.5 + 0.5 * sin(uTime * aTw + aPhase), 3.0);
-  vA = (0.25 + 0.75 * tw) * (1.0 - uSpread * 0.6);
-  vHot = smoothstep(1.08, 1.0, aRadius) * tw;
-  gl_PointSize = aSize * (0.55 + 0.9 * tw) * uPR * (6.0 / -mv.z);
+  vA = (0.25 + 0.75 * tw) * (1.0 - uSpread * 0.6) * smoothstep(1.0, 0.82, abs(u));
+  vHot = smoothstep(0.06, 0.0, aRad * taper) * tw;
+  gl_PointSize = aSize * (0.45 + 0.55 * taper) * (0.55 + 0.9 * tw) * uPR * (6.0 / -mv.z);
   gl_Position = projectionMatrix * mv;
 }`;
 const ringFrag = /* glsl */ `
@@ -186,8 +193,8 @@ export default function Planet({ onReady }: { onReady?: (api: PlanetApi) => void
     const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
     camera.position.set(0, 0, 4.2);
 
-    const light = new THREE.Vector3(-0.85, 0.75, -0.75);
-    const lightEnd = new THREE.Vector3(-0.45, 0.65, 0.85);
+    const light = new THREE.Vector3(0, 0.82, -0.72);
+    const lightEnd = new THREE.Vector3(0, 0.62, 0.85);
     const uLight = { value: light.clone() };
     const uTime = { value: 0 };
 
@@ -206,17 +213,15 @@ export default function Planet({ onReady }: { onReady?: (api: PlanetApi) => void
 
     // crescent of shimmering points, concentrated on the lit limb
     const N = small ? 4200 : 9000;
-    const litAngle = Math.atan2(light.y, light.x);
-    const attrs = { aAngle: new Float32Array(N), aRadius: new Float32Array(N), aSpeed: new Float32Array(N), aSize: new Float32Array(N), aPhase: new Float32Array(N), aTw: new Float32Array(N), aZ: new Float32Array(N) };
+    const attrs = { aOff: new Float32Array(N), aRad: new Float32Array(N), aSpeed: new Float32Array(N), aSize: new Float32Array(N), aPhase: new Float32Array(N), aTw: new Float32Array(N), aZ: new Float32Array(N) };
     for (let i = 0; i < N; i++) {
-      // crescent: thick where the sun hits, thinning to points at both tips
-      const spread = (Math.random() * 2 - 1) * 1.9;
-      const taper = Math.pow(Math.cos((spread / 1.9) * Math.PI * 0.5), 1.6);
+      // position along the arc and height off the limb; the taper is applied in the shader
       const outer = Math.random() < 0.1;
-      attrs.aAngle[i] = litAngle + spread;
-      attrs.aRadius[i] = 1.006 + Math.pow(Math.random(), 2.2) * (outer ? 0.3 : 0.11) * taper + Math.random() * 0.004;
-      attrs.aSpeed[i] = (0.03 + Math.random() * 0.05) * (Math.random() < 0.5 ? 1 : 0.6);
-      attrs.aSize[i] = (outer ? 1.1 : 1.5) + Math.random() * 3.0 * taper;
+      attrs.aOff[i] = (Math.random() * 2 - 1) * 1.95;
+      attrs.aRad[i] = Math.pow(Math.random(), 2.2) * (outer ? 0.3 : 0.11) + Math.random() * 0.004;
+      // half the dust flows each way, so neither side ever thins out
+      attrs.aSpeed[i] = (0.025 + Math.random() * 0.045) * (i % 2 ? 1 : -1);
+      attrs.aSize[i] = (outer ? 1.2 : 1.6) + Math.random() * 3.0;
       attrs.aPhase[i] = Math.random() * 6.283;
       attrs.aTw[i] = 0.8 + Math.random() * 3.2;
       attrs.aZ[i] = 0.02 + Math.random() * 0.04;
@@ -224,11 +229,12 @@ export default function Planet({ onReady }: { onReady?: (api: PlanetApi) => void
     const ringGeo = new THREE.BufferGeometry();
     ringGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(N * 3), 3));
     (Object.keys(attrs) as (keyof typeof attrs)[]).forEach((k) => ringGeo.setAttribute(k, new THREE.BufferAttribute(attrs[k], 1)));
-    const ringU = { uTime, uSpread: { value: 0 }, uPR: { value: dpr }, uMouse: { value: new THREE.Vector2(99, 99) }, uHover: { value: 0 }, uR: { value: 1 } };
+    const ringU = { uTime, uSpread: { value: 0 }, uPR: { value: dpr }, uMouse: { value: new THREE.Vector2(99, 99) }, uHover: { value: 0 }, uR: { value: 1 }, uCenter: { value: Math.PI / 2 } };
     const ring = new THREE.Points(ringGeo, new THREE.ShaderMaterial({ vertexShader: ringVert, fragmentShader: ringFrag, uniforms: ringU, transparent: true, depthWrite: false, depthTest: false, blending: THREE.AdditiveBlending }));
     ring.frustumCulled = false;
     ring.renderOrder = 2;
     world.add(ring);
+
 
     // stars
     const S = small ? 500 : 1100;
