@@ -17,6 +17,8 @@
 
 @layer base {
   :root { --blue: #0050f0; --sky: #2f8fff; --paper: #f4f3ef; --ink: #141414; --skew: 0deg; }
+  /* clip (not hidden) so Android Chrome never widens the page to fit overflowing content */
+  html, body { overflow-x: clip; max-width: 100%; }
   html { background: #000; }
   html.lenis, html.lenis body { height: auto; }
   .lenis.lenis-smooth { scroll-behavior: auto !important; }
@@ -26,7 +28,6 @@
     background: var(--paper);
     color: var(--ink);
     -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
   }
   ::selection { background: var(--blue); color: #fff; }
   button { text-transform: inherit; }

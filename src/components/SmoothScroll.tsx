@@ -7,6 +7,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger);
+    // the mobile address bar showing/hiding must not recalculate every scroll animation mid-scroll
+    ScrollTrigger.config({ ignoreMobileResize: true });
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const lenis = new Lenis({ lerp: 0.1 });
     (window as unknown as { __lenis?: Lenis }).__lenis = lenis;

@@ -31,13 +31,15 @@ export default function Hero() {
       const jumping = () => (window as unknown as { __navJump?: boolean }).__navJump;
       const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
       let auto = false;
+      const touch = window.matchMedia("(hover: none), (pointer: coarse)").matches;
       ScrollTrigger.create({
         trigger: el, start: "top top", end: "bottom bottom",
         onUpdate: (self) => {
           progress.current = self.progress;
           planet.current?.setProgress(self.progress);
           const l = lenis();
-          if (!l || auto || jumping()) return;
+          // touch screens: the dive just follows the finger (auto-scrolling fights the thumb)
+          if (!l || auto || jumping() || touch) return;
           // past the start of the dive: play it through to the next section
           if (self.direction === 1 && self.progress > 0.4 && self.progress < 0.995) {
             auto = true;
@@ -52,7 +54,7 @@ export default function Hero() {
         trigger: el, start: "top top", end: "bottom top",
         onUpdate: (self) => {
           const l = lenis();
-          if (!l || auto || jumping() || self.direction !== -1) return;
+          if (!l || auto || jumping() || touch || self.direction !== -1) return;
           const range = el.offsetHeight - window.innerHeight;
           const y = window.scrollY - el.offsetTop;
           if (y > range * 0.4 && y < el.offsetHeight - 8) {
@@ -102,7 +104,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section ref={root} className="relative bg-black h-[260vh]">
+    <section ref={root} className="relative bg-black h-[260vh] supports-[height:100lvh]:h-[260lvh]">
       <div className="sticky top-0 h-[100svh] overflow-hidden text-paper">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_100%,#001a5c_0%,#000614_45%,#000_75%)]" />
 
@@ -126,7 +128,7 @@ export default function Hero() {
 
         <div className="hero-blue z-[3] absolute inset-0 bg-blue opacity-0 pointer-events-none" />
         <div className="absolute z-[4] inset-0 flex items-end pointer-events-none" aria-hidden>
-          {Array.from({ length: 7 }).map((_, i) => <div key={i} className="hero-stair flex-1 h-full bg-paper origin-bottom" style={{ transform: "scaleY(0)" }} />)}
+          {Array.from({ length: 7 }).map((_, i) => <div key={i} className="hero-stair flex-1 -mr-px h-full bg-paper origin-bottom" style={{ transform: "scaleY(0)" }} />)}
         </div>
 
       </div>

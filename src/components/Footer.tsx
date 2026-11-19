@@ -8,7 +8,7 @@ export default function Footer() {
   const [sent, setSent] = useState(false);
   return (
     <footer className="bg-black text-paper">
-      <div className="grid lg:grid-cols-2 lg:h-[100svh] lg:min-h-[620px]">
+      <div className="grid grid-cols-[minmax(0,1fr)] lg:grid-cols-2 lg:h-[100svh] lg:min-h-[620px]">
         <div className="relative min-h-[48vh] lg:min-h-0">
           <div className="ht absolute inset-0" data-reveal>
             <img src={M("city-night")} alt="Jalan kota di malam hari" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
