@@ -31,21 +31,48 @@ export default function Hero() {
       const jumping = () => (window as unknown as { __navJump?: boolean }).__navJump;
       const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
       let auto = false;
-      const touch = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+      let input: "wheel" | "touch" = "wheel";
+      let lastDir = 1;
+      let cancelGlide: (() => void) | null = null;
+      const range = () => el.offsetHeight - window.innerHeight;
+      const diveEnd = () => el.offsetTop + el.offsetHeight;          // the next section itself
+      const rewindTo = () => el.offsetTop + range() * 0.32;          // back to the planet
+
+      // wheel / trackpad: Lenis glides there and ignores further wheel input meanwhile
+      const lenisGlide = (to: number, duration: number) => {
+        const l = lenis(); if (!l) return;
+        auto = true;
+        l.scrollTo(to, { duration, easing: ease, lock: true, onComplete: () => { auto = false; } });
+      };
+      // touch: runs after the finger lifts; freezing overflow kills native momentum so nothing fights it,
+      // and touching the screen again hands control straight back
+      const touchGlide = (to: number, duration: number) => {
+        const root = document.documentElement;
+        const from = window.scrollY, t0 = performance.now();
+        let raf = 0;
+        auto = true;
+        root.style.overflow = "hidden";
+        const done = () => { cancelAnimationFrame(raf); root.style.overflow = ""; auto = false; cancelGlide = null; };
+        const step = (now: number) => {
+          const k = Math.min(1, (now - t0) / (duration * 1000));
+          window.scrollTo(0, from + (to - from) * ease(k));
+          if (k < 1) raf = requestAnimationFrame(step); else done();
+        };
+        raf = requestAnimationFrame(step);
+        cancelGlide = done;
+      };
+
+      const inDive = () => { const y = window.scrollY - el.offsetTop; return y > range() * 0.4 && y < range() * 0.995; };
+      const inRewind = () => { const y = window.scrollY - el.offsetTop; return y > range() * 0.4 && y < el.offsetHeight - 8; };
+
       ScrollTrigger.create({
         trigger: el, start: "top top", end: "bottom bottom",
         onUpdate: (self) => {
           progress.current = self.progress;
           planet.current?.setProgress(self.progress);
-          const l = lenis();
-          // touch screens: the dive just follows the finger (auto-scrolling fights the thumb)
-          if (!l || auto || jumping() || touch) return;
-          // past the start of the dive: play it through to the next section
-          if (self.direction === 1 && self.progress > 0.4 && self.progress < 0.995) {
-            auto = true;
-            // land on the next section itself, not on the end of the pinned stage
-            l.scrollTo(el.offsetTop + el.offsetHeight, { duration: 2.6, easing: ease, lock: true, onComplete: () => { auto = false; } });
-          }
+          lastDir = self.direction;
+          if (auto || jumping() || input === "touch") return;
+          if (self.direction === 1 && inDive()) lenisGlide(diveEnd(), 2.6);
         },
       });
       // scrolling back up from the next section: rewind straight to the planet.
@@ -53,15 +80,29 @@ export default function Hero() {
       ScrollTrigger.create({
         trigger: el, start: "top top", end: "bottom top",
         onUpdate: (self) => {
-          const l = lenis();
-          if (!l || auto || jumping() || touch || self.direction !== -1) return;
-          const range = el.offsetHeight - window.innerHeight;
-          const y = window.scrollY - el.offsetTop;
-          if (y > range * 0.4 && y < el.offsetHeight - 8) {
-            auto = true;
-            l.scrollTo(el.offsetTop + range * 0.32, { duration: 2.2, easing: ease, lock: true, onComplete: () => { auto = false; } });
-          }
+          lastDir = self.direction;
+          if (auto || jumping() || input === "touch" || self.direction !== -1) return;
+          if (inRewind()) lenisGlide(rewindTo(), 2.2);
         },
+      });
+
+      const onWheel = () => { input = "wheel"; };
+      const onTouchStart = () => { input = "touch"; cancelGlide?.(); };
+      const onTouchEnd = () => {
+        if (auto || jumping()) return;
+        if (lastDir === 1 && inDive()) touchGlide(diveEnd(), 1.9);
+        else if (lastDir === -1 && inRewind()) touchGlide(rewindTo(), 1.7);
+      };
+      window.addEventListener("wheel", onWheel, { passive: true });
+      window.addEventListener("touchstart", onTouchStart, { passive: true });
+      window.addEventListener("touchend", onTouchEnd, { passive: true });
+      window.addEventListener("touchcancel", onTouchEnd, { passive: true });
+      cleanups.push(() => {
+        cancelGlide?.();
+        window.removeEventListener("wheel", onWheel);
+        window.removeEventListener("touchstart", onTouchStart);
+        window.removeEventListener("touchend", onTouchEnd);
+        window.removeEventListener("touchcancel", onTouchEnd);
       });
       if (reduce) return;
       gsap.from(".planet-wrap", { opacity: 0, duration: 0.9, ease: "power1.out" });
