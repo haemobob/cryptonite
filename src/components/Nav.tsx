@@ -51,7 +51,12 @@ export default function Nav() {
 
   const go = (h: string) => {
     setOpen(false);
-    setTimeout(() => { const l = lenis(); if (l) l.scrollTo(h, { duration: 1.4 }); else document.querySelector(h)?.scrollIntoView(); }, 450);
+    setTimeout(() => {
+      const l = lenis();
+      const w = window as unknown as { __navJump?: boolean };
+      if (l) { w.__navJump = true; l.scrollTo(h, { duration: 1.4, onComplete: () => { w.__navJump = false; } }); }
+      else document.querySelector(h)?.scrollIntoView();
+    }, 450);
   };
 
   return (
@@ -63,7 +68,7 @@ export default function Nav() {
               <a key={k.l} href={k.h} onClick={(e) => { e.preventDefault(); go(k.h); }} className="hover:text-sky transition-colors"><span className="roll"><span>{k.l}</span></span></a>
             ))}
           </nav>
-          <a href="#" aria-label="Cryptonite, kembali ke atas" className="col-start-2 justify-self-center" onClick={(e) => { e.preventDefault(); lenis()?.scrollTo(0, { duration: 1.4 }); }}>
+          <a href="#" aria-label="Cryptonite, kembali ke atas" className="col-start-2 justify-self-center" onClick={(e) => { e.preventDefault(); const w = window as unknown as { __navJump?: boolean }; w.__navJump = true; lenis()?.scrollTo(0, { duration: 1.4, onComplete: () => { w.__navJump = false; } }); }}>
             <Image src="/logo-alpha.png" alt="Cryptonite" width={431} height={72} priority className="h-[20px] md:h-[26px] w-auto" />
           </a>
           <div className="col-start-3 justify-self-end flex items-center gap-5 lbl">

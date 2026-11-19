@@ -44,9 +44,9 @@ export default function Stories() {
 
   return (
     <section id="liputan" ref={root} className="grain bg-paper text-ink">
-      <div className="st-pin lg:h-screen flex flex-col justify-center overflow-hidden pt-24 lg:pt-16 pb-16 lg:pb-8">
-        <div className="st-head px-4 md:px-8 flex flex-wrap items-end justify-between gap-6 mb-10 lg:mb-12">
-          <h2 className="cmp text-[17vw] sm:text-[12vw] lg:text-[7.4vw]">
+      <div className="st-pin lg:h-screen flex flex-col justify-start overflow-hidden pt-24 lg:pt-[max(84px,10vh)] pb-16 lg:pb-[3vh]">
+        <div className="st-head px-4 md:px-8 flex flex-wrap items-end justify-between gap-6 mb-10 lg:mb-[2.5vh]">
+          <h2 className="cmp text-[17vw] sm:text-[12vw] lg:text-[min(7.4vw,11.5vh)]">
             <span className="mask inline-block align-bottom"><span className="ln cmp-out" data-ink="ink">Liputan </span></span>{" "}
             <span className="mask inline-block align-bottom"><span className="ln">terbaru</span></span>
           </h2>
@@ -60,8 +60,8 @@ export default function Stories() {
             {STORIES.map((s, i) => {
               const t = TONES[s.tone as keyof typeof TONES];
               return (
-                <article key={s.title} data-cursor="Baca" className={`st-card group snap-start shrink-0 w-[78vw] sm:w-[340px] lg:w-[min(30vw,420px)] border ${t.card} shadow-[0_24px_50px_-28px_rgba(0,0,0,.45)]`} style={{ rotate: `${TILT[i % TILT.length]}deg` }}>
-                  <div className={`ht relative ${s.tone === "blue" ? "ht-blue" : ""} aspect-[4/4.2] border-b border-inherit`}>
+                <article key={s.title} data-cursor="Baca" className={`st-card group snap-start shrink-0 w-[78vw] sm:w-[340px] lg:w-[min(26vw,380px,calc((100vh-290px)*0.6))] border ${t.card} shadow-[0_24px_50px_-28px_rgba(0,0,0,.45)]`} style={{ rotate: `${TILT[i % TILT.length]}deg` }}>
+                  <div className={`ht relative ${s.tone === "blue" ? "ht-blue" : ""} aspect-[4/4.2] lg:aspect-[4/3.5] border-b border-inherit`}>
                     <img src={M(s.img)} alt="" className="absolute -inset-[4%] h-[108%] w-[108%] object-cover vskew" loading="lazy" />
                   </div>
                   <div className="px-5 pt-4">
@@ -69,7 +69,7 @@ export default function Stories() {
                       <span className={`cmp text-xl ${t.tag}`}>{s.tag}</span>
                       <span className="lbl opacity-75">{s.date}</span>
                     </div>
-                    <h3 className="cmp text-[2.6rem] lg:text-[clamp(2.2rem,2.9vw,3rem)] mt-2 min-h-[2.6em]">{s.title}</h3>
+                    <h3 className="cmp text-[2.6rem] lg:text-[clamp(1.8rem,min(2.5vw,4.2vh),2.7rem)] mt-2 min-h-[2.6em]">{s.title}</h3>
                   </div>
                   <div className="flex items-stretch justify-between mt-5 border-t border-inherit">
                     <span className="lbl self-center px-5">{s.read} baca</span>
@@ -80,7 +80,7 @@ export default function Stories() {
             })}
           </div>
         </div>
-        <div className="hidden lg:block mx-8 mt-8 h-px bg-ink/20"><div className="st-progress h-full bg-blue origin-left scale-x-0" /></div>
+        <div className="hidden lg:block mx-8 mt-[2vh] h-px bg-ink/20"><div className="st-progress h-full bg-blue origin-left scale-x-0" /></div>
       </div>
     </section>
   );

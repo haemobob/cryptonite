@@ -26,7 +26,7 @@ export default function Manifesto() {
       };
       if (!reduce) {
         // words fill in as the paragraph scrolls through the viewport
-        gsap.fromTo(".mw", { opacity: 0.14 }, { opacity: 1, stagger: 0.05, ease: "none", scrollTrigger: { trigger: ".mtext", start: "top 78%", end: "bottom 45%", scrub: true } });
+        gsap.fromTo(".mw", { opacity: 0.22 }, { opacity: 1, stagger: 0.05, ease: "none", scrollTrigger: { trigger: ".mtext", start: "top 92%", end: "bottom 45%", scrub: true } });
         gsap.utils.toArray<HTMLElement>("[data-speed]").forEach((el) => {
           const s = parseFloat(el.dataset.speed!);
           gsap.fromTo(el, { yPercent: 18 * s, rotate: el.dataset.rot0 ? +el.dataset.rot0 : 0 }, {
@@ -45,7 +45,7 @@ export default function Manifesto() {
 
   return (
     <section className="grain bg-paper text-ink overflow-hidden" ref={root}>
-      <div className="relative px-4 md:px-8 pt-28 md:pt-40 pb-24 md:pb-36 grid lg:grid-cols-12 gap-14">
+      <div className="relative px-4 md:px-8 pt-24 md:pt-28 pb-24 md:pb-36 grid lg:grid-cols-12 gap-14">
         <p className="mtext lg:col-span-7 cmp text-[12.5vw] sm:text-[9vw] lg:text-[5.4vw] leading-[0.9]">
           {words.map((w, i) => {
             const circle = w.startsWith("{");

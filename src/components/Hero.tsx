@@ -27,9 +27,39 @@ export default function Hero() {
 
     const ctx = gsap.context(() => {
       // scroll progress drives the 3D scene
+      const lenis = () => (window as unknown as { __lenis?: { scrollTo: (t: number, o: object) => void } }).__lenis;
+      const jumping = () => (window as unknown as { __navJump?: boolean }).__navJump;
+      const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+      let auto = false;
       ScrollTrigger.create({
         trigger: el, start: "top top", end: "bottom bottom",
-        onUpdate: (self) => { progress.current = self.progress; planet.current?.setProgress(self.progress); },
+        onUpdate: (self) => {
+          progress.current = self.progress;
+          planet.current?.setProgress(self.progress);
+          const l = lenis();
+          if (!l || auto || jumping()) return;
+          // past the start of the dive: play it through to the next section
+          if (self.direction === 1 && self.progress > 0.4 && self.progress < 0.995) {
+            auto = true;
+            // land on the next section itself, not on the end of the pinned stage
+            l.scrollTo(el.offsetTop + el.offsetHeight, { duration: 2.6, easing: ease, lock: true, onComplete: () => { auto = false; } });
+          }
+        },
+      });
+      // scrolling back up from the next section: rewind straight to the planet.
+      // tracked over the whole section so it fires before you reach the pinned part
+      ScrollTrigger.create({
+        trigger: el, start: "top top", end: "bottom top",
+        onUpdate: (self) => {
+          const l = lenis();
+          if (!l || auto || jumping() || self.direction !== -1) return;
+          const range = el.offsetHeight - window.innerHeight;
+          const y = window.scrollY - el.offsetTop;
+          if (y > range * 0.4 && y < el.offsetHeight - 8) {
+            auto = true;
+            l.scrollTo(el.offsetTop + range * 0.32, { duration: 2.2, easing: ease, lock: true, onComplete: () => { auto = false; } });
+          }
+        },
       });
       if (reduce) { gsap.set(".intro-step", { display: "none" }); return; }
 
