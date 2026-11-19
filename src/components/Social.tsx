@@ -6,7 +6,6 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { M, POSTS, SOCIALS } from "@/lib/data";
 import { FbIcon, IgIcon, ThreadsIcon } from "./Icons";
 import SectionHead from "./SectionHead";
-import Stairs from "./Stairs";
 
 const FAN = [
   { x: -118, r: -11 }, { x: -38, r: -3.5 }, { x: 40, r: 4 }, { x: 120, r: 11 },
@@ -41,7 +40,7 @@ export default function Social() {
   ];
 
   return (
-    <section ref={root} className="sec !pb-0 bg-black text-paper overflow-hidden border-t border-white/10">
+    <section ref={root} className="sec bg-black text-paper overflow-hidden border-t border-white/10">
       <SectionHead label="Media sosial" meta="@cryptoniteid" outline="Ikuti" solid="timeline kami" />
 
       <div className="fan relative h-[440px] md:h-[600px] mt-14 flex justify-center">
@@ -71,7 +70,6 @@ export default function Social() {
           </a>
         ))}
       </div>
-      <Stairs to="#0050f0" className="-mx-4 md:-mx-8 mt-20 md:mt-28" />
     </section>
   );
 }

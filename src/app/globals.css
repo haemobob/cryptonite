@@ -57,7 +57,7 @@
     font-size: clamp(1.55rem, min(2.1vw, 3.8vh), 2.3rem); }
   .t-body { font-weight: 500; font-size: clamp(1rem, 1.1vw, 1.15rem); line-height: 1.42; }
   .t-lead { font-weight: 500; font-size: clamp(1.15rem, 1.45vw, 1.45rem); line-height: 1.28; }
-  .muted { color: color-mix(in srgb, currentColor 62%, transparent); }
+  .muted { color: rgb(244 243 239 / .62); }
 
   /* section rhythm */
   .sec { padding: clamp(5rem, 12vh, 9rem) 1rem; }
@@ -68,16 +68,8 @@
     font-family: var(--font-gothic); font-weight: 750; text-transform: uppercase; letter-spacing: .02em; font-size: 15px; padding: .85rem 1rem;
     transition: background-color .3s, color .3s; }
   .btn:hover { background: #fff; color: #000; }
-  .btn-line { background: transparent; border: 1px solid color-mix(in srgb, currentColor 35%, transparent); color: inherit; }
+  .btn-line { background: transparent; border: 1px solid rgb(244 243 239 / .35); color: var(--paper); }
   .btn-line:hover { background: var(--paper); color: #000; border-color: var(--paper); }
-
-  /* section themes: same system, inverted colours */
-  .theme-light { background: #f6f6f3; color: var(--ink); --stroke: var(--ink); }
-  .theme-light .btn:hover { background: #000; color: #fff; }
-  .theme-light .btn-line:hover { background: #000; color: #fff; border-color: #000; }
-  .theme-blue { background: var(--blue); color: #fff; --stroke: #fff; }
-  .theme-blue .btn { background: #fff; color: var(--blue); }
-  .theme-blue .btn:hover { background: #000; color: #fff; }
 
   /* small labels: same gothic, not a monospace */
   .lbl { font-family: var(--font-gothic); font-weight: 650; font-size: 15px; line-height: 1.15; text-transform: uppercase; letter-spacing: 0.02em; }
@@ -110,9 +102,6 @@
     mix-blend-mode: multiply; transition: opacity .6s ease;
   }
   .ht-blue { background: var(--blue); }
-  /* ink variant for photos that sit on a blue section: white dots on black */
-  .ht.ht-ink { background: #000; }
-  .ht.ht-ink > img { filter: grayscale(1) contrast(1.35) brightness(.9); }
   .ht-blue > img { filter: grayscale(1) contrast(1.3); mix-blend-mode: screen; }
   .ht:hover > img, .ht.on > img, .group:hover .ht > img { filter: none; mix-blend-mode: normal; }
   .checker-w { background: repeating-conic-gradient(rgb(244 243 239 / .9) 0 25%, transparent 0 50%) 0 0 / 10px 10px; }
