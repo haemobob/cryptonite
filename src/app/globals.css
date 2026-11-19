@@ -108,3 +108,7 @@
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
   .vskew { transform: none; }
 }
+
+/* planet fallback (no WebGL) */
+.planet-fallback { display: none; background: radial-gradient(circle at 32% 22%, #6fb6ff 0%, #0050f0 18%, #0030a8 38%, #000a26 66%); box-shadow: 0 0 140px 30px rgba(47,143,255,.35), inset -40px -60px 120px rgba(0,0,0,.8); }
+[data-fallback="1"] .planet-fallback { display: block; }
